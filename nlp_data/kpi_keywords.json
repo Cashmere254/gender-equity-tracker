@@ -1,0 +1,56 @@
+{
+  "GEQ-01": {
+    "name": "Leadership Confidence",
+    "category": "Leadership",
+    "keywords": [
+      "leadership","confidence","speak up","voice","empower",
+      "decision","initiative","assertive","inspire","lead",
+      "ujasiri","uongozi","amua","ongoza"
+    ]
+  },
+  "GEQ-02": {
+    "name": "Self-Esteem Improvement",
+    "category": "Wellbeing",
+    "keywords": [
+      "self-esteem","self-worth","believe","proud","dignity",
+      "respect","value","identity","wellbeing","confidence",
+      "kujithamini","kiburi","heshima","utambuzi"
+    ]
+  },
+  "GEQ-03": {
+    "name": "Education Access",
+    "category": "Education",
+    "keywords": [
+      "school","education","scholarship","study","learn",
+      "university","class","graduate","academic","mentor",
+      "elimu","chuo","masomo","bursary","ushauri"
+    ]
+  },
+  "GEQ-04": {
+    "name": "Economic Empowerment",
+    "category": "Economic",
+    "keywords": [
+      "income","job","employment","business","financial",
+      "savings","entrepreneur","livelihood","economic","earn",
+      "kipato","kazi","biashara","akiba","uchumi"
+    ]
+  },
+  "GEQ-05": {
+    "name": "Community Engagement",
+    "category": "Social",
+    "keywords": [
+      "community","network","peers","social","group",
+      "participate","collaborate","advocate","outreach","change",
+      "jamii","ushirikiano","shirika","harakati","mabadiliko"
+    ]
+  },
+  "GEQ-06": {
+    "name": "Safety and Protection",
+    "category": "Safety",
+    "keywords": [
+      "safe","violence","protect","harm","rights",
+      "abuse","gender based","GBV","support","survivor",
+      "usalama","ukatili","haki","ulinzi","msaada"
+    ]
+  }
+}
