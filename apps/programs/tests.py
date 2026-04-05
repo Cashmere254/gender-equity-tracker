@@ -42,3 +42,49 @@ class IndicatorModelTest(TestCase):
             Indicator.objects.create(
                 code='TEST-01', name='Duplicate', kpi_category='Test'
             )
+
+# ADD/Append here
+
+from rest_framework.test import APIClient
+
+
+class ProgramAPITest(TestCase):
+
+    def setUp(self):
+        self.client = APIClient()
+        self.user = CustomUser.objects.create_user(
+            username='me_officer',
+            email='me@akili.org',
+            password='pass123',
+            role='ME Officer'
+        )
+        # Authenticate the client
+        login = self.client.post('/api/auth/login/', {
+            'username': 'me_officer',
+            'password': 'pass123'
+        })
+        self.client.credentials(
+            HTTP_AUTHORIZATION=f"Bearer {login.data['access']}"
+        )
+
+    def test_create_program(self):
+        response = self.client.post('/api/programs/programs/', {
+            'name': 'Test Program',
+            'start_date': '2026-01-01'
+        })
+        self.assertEqual(response.status_code, 201)
+
+    def test_list_indicators(self):
+        Indicator.objects.create(
+            code='GEQ-01',
+            name='Leadership Confidence',
+            kpi_category='Leadership'
+        )
+        response = self.client.get('/api/programs/indicators/')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 1)
+
+    def test_unauthenticated_cannot_list_programs(self):
+        unauthenticated = APIClient()
+        response = unauthenticated.get('/api/programs/programs/')
+        self.assertEqual(response.status_code, 401)

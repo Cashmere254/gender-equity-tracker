@@ -111,7 +111,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # ─── CORS ────────────────────────────────────────────────────────────────────
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',  # React dev server
+    'http://127.0.0.1:3000',
 ]
+CORS_ALLOW_CREDENTIALS = True
 
 # ─── JWT (Django REST Framework Simple JWT) ──────────────────────────────────
 from datetime import timedelta
@@ -138,3 +140,10 @@ EMAIL_PORT = int(os.getenv('EMAIL_PORT', 587))
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
 EMAIL_USE_TLS = True
+
+# ─── FRONTEND URL (used in password reset email link) ────────────────────────
+FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:3000')
+
+# ─── FILE UPLOAD SIZE LIMIT (50 MB) ──────────────────────────────────────────
+DATA_UPLOAD_MAX_MEMORY_SIZE = 52428800  # 50 MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = 52428800  # 50 MB
