@@ -7,40 +7,39 @@ import Sidebar from '../components/Sidebar';
 
 export default function EvidenceLibraryPage() {
   const [selectedProgram, setSelected] = useState('');
-  const [expandedId, setExpanded] = useState(null);
-  const { data: programs } = useFetch(getPrograms);
-  const { data: narratives, loading } = useFetch(
+  const [expandedId, setExpanded]      = useState(null);
+  const { data: programs }             = useFetch(getPrograms);
+  const { data: narratives, loading }  = useFetch(
     () => getNarratives(selectedProgram), [selectedProgram]
   );
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', fontFamily: 'Arial, sans-serif' }}>
+    <div className="page-layout">
       <Sidebar />
-      <main style={{ flex: 1, padding: '32px', background: '#F7F5FB' }}>
+      <main className="main-content">
 
-        <h1 style={{ color: '#4B2E83', marginBottom: '8px' }}>Evidence Library</h1>
-        <p style={{ color: '#666', marginBottom: '24px' }}>
+        <h1 className="page-title">Evidence Library</h1>
+        <p className="page-subtitle">
           All analysed narrative chunks --- traceable to source documents and matched KPIs.
         </p>
 
         <select
-          style={{
-            padding: '8px 12px', borderRadius: '6px',
-            border: '1px solid #ccc', marginBottom: '24px', fontSize: '14px'
-          }}
+          className="form-input"
+          style={{ width: '280px', marginBottom: '24px' }}
           value={selectedProgram}
           onChange={(e) => setSelected(e.target.value)}
         >
-          <option value=''>All Programmes</option>
+          <option value="">All Programmes</option>
           {programs?.map((p) => (
             <option key={p.id} value={p.id}>{p.name}</option>
           ))}
         </select>
 
-        {loading && <p style={{ color: '#888' }}>Loading narratives...</p>}
-
+        {loading && (
+          <p style={{ color: 'var(--color-text-muted)' }}>Loading narratives...</p>
+        )}
         {!loading && narratives?.length === 0 && (
-          <p style={{ color: '#888', fontStyle: 'italic' }}>
+          <p style={{ color: 'var(--color-text-muted)', fontStyle: 'italic' }}>
             No narratives yet. Upload a report to populate the library.
           </p>
         )}
@@ -49,36 +48,36 @@ export default function EvidenceLibraryPage() {
           {narratives?.map((n) => (
             <div
               key={n.id}
-              style={{
-                background: '#fff', borderRadius: '10px', padding: '20px',
-                boxShadow: '0 2px 8px rgba(75,46,131,0.08)', cursor: 'pointer'
-              }}
+              className="card"
+              style={{ cursor: 'pointer', transition: 'var(--transition)' }}
+              onMouseEnter={(e) => e.currentTarget.style.boxShadow = '0 4px 20px rgba(75,46,131,0.18)'}
+              onMouseLeave={(e) => e.currentTarget.style.boxShadow = 'var(--shadow-card)'}
               onClick={() => setExpanded(expandedId === n.id ? null : n.id)}
             >
               {/* Preview row */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <div style={{ flex: 1 }}>
-                  <p style={{ color: '#1A1A2E', fontSize: '14px', margin: '0 0 8px', lineHeight: 1.5 }}>
+                  <p style={{ color: 'var(--color-text)', fontSize: '14px', margin: '0 0 8px', lineHeight: 1.5 }}>
                     {expandedId === n.id ? n.text : n.text_preview}
                   </p>
+
+                  {/* KPI badges */}
                   <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '6px' }}>
                     {n.kpis.map((k) => (
-                      <span key={k.code} style={{
-                        background: '#4B2E83', color: '#fff',
-                        fontSize: '11px', padding: '2px 10px', borderRadius: '20px'
-                      }}>
-                        {k.code} --- {Math.round(k.confidence * 100)}%
+                      <span key={k.code} className="badge badge-purple">
+                        {k.code} — {Math.round(k.confidence * 100)}%
                       </span>
                     ))}
                   </div>
                 </div>
-                <span style={{ color: '#C9A84C', fontSize: '18px', marginLeft: '16px' }}>
+
+                <span style={{ color: 'var(--color-accent)', fontSize: '18px', marginLeft: '16px' }}>
                   {expandedId === n.id ? '▲' : '▼'}
                 </span>
               </div>
 
               {/* Metadata */}
-              <div style={{ marginTop: '8px', fontSize: '12px', color: '#999' }}>
+              <div style={{ marginTop: '8px', fontSize: '12px', color: 'var(--color-text-muted)' }}>
                 Source: {n.document_name} &nbsp;·&nbsp;
                 Programme: {n.program} &nbsp;·&nbsp;
                 {n.created_at.slice(0, 10)}

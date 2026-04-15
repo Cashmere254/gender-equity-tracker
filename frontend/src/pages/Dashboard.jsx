@@ -9,19 +9,16 @@ import Sidebar from '../components/Sidebar';
 import KPICard from '../components/KPICard';
 
 export default function Dashboard() {
-  const { user } = useAuth();
-  const [selectedProgram, setSelected] = useState('');
-  const [kpiData, setKpiData] = useState([]);
-  const [kpiLoading, setKpiLoading] = useState(false);
+  const { user }                                                    = useAuth();
+  const [selectedProgram, setSelected]                              = useState('');
+  const [kpiData, setKpiData]                                       = useState([]);
+  const [kpiLoading, setKpiLoading]                                 = useState(false);
+  const { data: programs, loading: progLoading, error: progError }  = useFetch(getPrograms);
 
-  const { data: programs, loading: progLoading, error: progError } = useFetch(getPrograms);
-
-  // Set first program as default when programs load
   useEffect(() => {
     if (programs?.length > 0 && !selectedProgram) setSelected(programs[0].id);
   }, [programs, selectedProgram]);
 
-  // Fetch KPI data when selected program changes
   useEffect(() => {
     if (!selectedProgram) return;
     setKpiLoading(true);
@@ -32,42 +29,31 @@ export default function Dashboard() {
   }, [selectedProgram]);
 
   if (progLoading) return (
-    <div style={{ padding: '60px', textAlign: 'center', color: '#4B2E83' }}>
+    <div style={{ padding: '60px', textAlign: 'center', color: 'var(--color-primary)' }}>
       Loading dashboard...
     </div>
   );
-
   if (progError) return (
-    <div style={{ padding: '40px', color: '#C0392B' }}>
+    <div style={{ padding: '40px', color: 'var(--color-danger)' }}>
       Error loading programmes. Please refresh.
     </div>
   );
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', fontFamily: 'Arial, sans-serif' }}>
+    <div className="page-layout">
       <Sidebar />
-      <main style={{ flex: 1, padding: '32px', background: '#F7F5FB', overflowY: 'auto' }}>
+      <main className="main-content">
 
-        {/* ─── Top bar ──────────────────────────────────────────────────── */}
+        {/* ─── Top bar ──────────────────────────────────────────── */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px' }}>
-          <h1 style={{ color: '#4B2E83', margin: 0, fontSize: '24px' }}>
-            M&E Officer Dashboard
-          </h1>
-          <span style={{
-            background: '#C9A84C', color: '#fff',
-            padding: '4px 12px', borderRadius: '20px',
-            fontSize: '12px', fontWeight: 700
-          }}>
-            {user?.role}
-          </span>
+          <h1 className="page-title" style={{ margin: 0 }}>M&E Officer Dashboard</h1>
+          <span className="badge badge-gold">{user?.role}</span>
         </div>
 
-        {/* ─── Programme selector ───────────────────────────────────────── */}
+        {/* ─── Programme selector ───────────────────────────────── */}
         <select
-          style={{
-            padding: '8px 12px', borderRadius: '6px',
-            border: '1px solid #ccc', marginBottom: '24px', fontSize: '14px'
-          }}
+          className="form-input"
+          style={{ width: '280px', marginBottom: '24px' }}
           value={selectedProgram}
           onChange={(e) => setSelected(e.target.value)}
         >
@@ -76,43 +62,42 @@ export default function Dashboard() {
           ))}
         </select>
 
-        {/* ─── KPI Cards ────────────────────────────────────────────────── */}
+        {/* ─── KPI Cards ────────────────────────────────────────── */}
         {kpiLoading && (
-          <p style={{ color: '#888' }}>Updating KPI data...</p>
+          <p style={{ color: 'var(--color-text-muted)' }}>Updating KPI data...</p>
         )}
-
         {!kpiLoading && kpiData.length === 0 && (
-          <p style={{ color: '#888', fontStyle: 'italic' }}>
+          <p style={{ color: 'var(--color-text-muted)', fontStyle: 'italic' }}>
             No KPI data yet. Upload a programme report to see results.
           </p>
         )}
 
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
           gap: '16px',
-          marginBottom: '32px'
+          marginBottom: '32px',
         }}>
           {kpiData.map((kpi) => (
             <KPICard key={kpi.indicator__code} kpi={kpi} />
           ))}
         </div>
 
-        {/* ─── Evidence bar chart ───────────────────────────────────────── */}
+        {/* ─── Bar chart ────────────────────────────────────────── */}
         {kpiData.length > 0 && (
-          <>
-            <h2 style={{ color: '#4B2E83', fontSize: '18px', marginBottom: '12px' }}>
+          <div className="card">
+            <h2 style={{ color: 'var(--color-primary)', fontSize: '16px', marginBottom: '16px' }}>
               Evidence Count by KPI
             </h2>
-            <ResponsiveContainer width='100%' height={220}>
+            <ResponsiveContainer width="100%" height={220}>
               <BarChart data={kpiData}>
-                <XAxis dataKey='indicator__code' />
+                <XAxis dataKey="indicator__code" />
                 <YAxis />
                 <Tooltip />
-                <Bar dataKey='evidence_count' fill='#4B2E83' radius={[4, 4, 0, 0]} />
+                <Bar dataKey="evidence_count" fill="var(--color-primary)" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
-          </>
+          </div>
         )}
 
       </main>

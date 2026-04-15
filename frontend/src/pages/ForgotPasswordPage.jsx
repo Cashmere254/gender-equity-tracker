@@ -6,8 +6,8 @@ import { forgotPassword } from '../services/api';
 import Navbar from '../components/Navbar';
 
 export default function ForgotPasswordPage() {
-  const [email, setEmail] = useState('');
-  const [sent, setSent] = useState(false);
+  const [email, setEmail]     = useState('');
+  const [sent, setSent]       = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
@@ -17,59 +17,62 @@ export default function ForgotPasswordPage() {
       await forgotPassword({ email });
       setSent(true);
     } catch {
-      // Always show success --- never confirm whether email exists (security)
-      setSent(true);
+      setSent(true); // Always show success for security
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div style={styles.page}>
+    <div style={{ minHeight: '100vh', background: 'var(--color-grey)', fontFamily: 'var(--font-base)' }}>
       <Navbar />
-      <div style={styles.outer}>
-        <div style={styles.card}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '80px 20px' }}>
+        <div className="card" style={{ maxWidth: '400px', width: '100%', padding: '40px' }}>
 
           {sent ? (
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontSize: '48px', marginBottom: '16px' }}>📬</div>
-              <h2 style={{ color: '#4B2E83', marginBottom: '12px' }}>
+              <h2 style={{ color: 'var(--color-primary)', marginBottom: '12px' }}>
                 Check Your Inbox
               </h2>
-              <p style={{ color: '#555', marginBottom: '20px' }}>
+              <div className="alert-success" style={{ marginBottom: '20px' }}>
                 If that email is registered, a reset link has been sent.
-              </p>
-              <Link to='/login' style={styles.link}>
+              </div>
+              <Link to="/login" style={{ color: 'var(--color-primary)', fontSize: '14px' }}>
                 Back to Sign In
               </Link>
             </div>
           ) : (
             <>
-              <h2 style={styles.title}>Reset Your Password</h2>
-              <p style={styles.subtitle}>
+              <h2 style={{ color: 'var(--color-primary)', fontSize: '22px', fontWeight: 700, marginBottom: '8px' }}>
+                Reset Your Password
+              </h2>
+              <p style={{ color: 'var(--color-text-muted)', fontSize: '14px', marginBottom: '24px' }}>
                 Enter your email and we'll send you a reset link.
               </p>
 
               <form onSubmit={handleSubmit}>
-                <label style={styles.label}>Email Address</label>
+                <label style={labelStyle}>Email Address</label>
                 <input
-                  type='email'
+                  className="form-input"
+                  style={{ marginBottom: '16px' }}
+                  type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  style={styles.input}
                 />
                 <button
-                  type='submit'
+                  className="btn-primary"
+                  type="submit"
                   disabled={loading}
-                  style={styles.btn}
+                  style={{ width: '100%', fontSize: '15px', padding: '12px' }}
                 >
                   {loading ? 'Sending...' : 'Send Reset Link'}
                 </button>
               </form>
 
               <div style={{ textAlign: 'center', marginTop: '16px' }}>
-                <Link to='/login' style={styles.link}>
+                <Link to="/login" style={{ color: 'var(--color-primary)', fontSize: '13px' }}>
                   Back to Sign In
                 </Link>
               </div>
@@ -82,67 +85,10 @@ export default function ForgotPasswordPage() {
   );
 }
 
-const styles = {
-  page: {
-    minHeight: '100vh',
-    background: '#F3EFF8',
-    fontFamily: 'Arial, sans-serif',
-  },
-  outer: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: '80px 20px',
-  },
-  card: {
-    background: '#fff',
-    padding: '40px',
-    borderRadius: '12px',
-    boxShadow: '0 4px 24px rgba(75,46,131,0.12)',
-    maxWidth: '400px',
-    width: '100%',
-  },
-  title: {
-    color: '#4B2E83',
-    fontSize: '22px',
-    fontWeight: 700,
-    marginBottom: '8px',
-  },
-  subtitle: {
-    color: '#666',
-    fontSize: '14px',
-    marginBottom: '24px',
-  },
-  label: {
-    display: 'block',
-    color: '#555',
-    fontSize: '13px',
-    fontWeight: 600,
-    marginBottom: '6px',
-  },
-  input: {
-    width: '100%',
-    padding: '10px',
-    border: '1px solid #ddd',
-    borderRadius: '6px',
-    marginBottom: '16px',
-    fontSize: '14px',
-    boxSizing: 'border-box',
-  },
-  btn: {
-    width: '100%',
-    padding: '12px',
-    background: '#4B2E83',
-    color: '#fff',
-    border: 'none',
-    borderRadius: '6px',
-    fontSize: '15px',
-    fontWeight: 700,
-    cursor: 'pointer',
-  },
-  link: {
-    color: '#4B2E83',
-    fontSize: '13px',
-    textDecoration: 'none',
-  },
+const labelStyle = {
+  display: 'block',
+  color: '#555',
+  fontSize: '13px',
+  fontWeight: 600,
+  marginBottom: '6px',
 };

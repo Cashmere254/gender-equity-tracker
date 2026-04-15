@@ -1,6 +1,4 @@
 // frontend/src/pages/ResetPasswordPage.jsx
-// Called when user clicks the reset link in their email.
-// URL format: /reset-password/:uid/:token
 
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -8,26 +6,23 @@ import { resetPassword } from '../services/api';
 import Navbar from '../components/Navbar';
 
 export default function ResetPasswordPage() {
-  const { uid, token } = useParams();
-  const navigate = useNavigate();
-  const [form, setForm] = useState({ new_password: '', confirm_password: '' });
-  const [error, setError] = useState('');
+  const { uid, token }        = useParams();
+  const navigate              = useNavigate();
+  const [form, setForm]       = useState({ new_password: '', confirm_password: '' });
+  const [error, setError]     = useState('');
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (form.new_password !== form.confirm_password) {
       setError('Passwords do not match.'); return;
     }
     if (form.new_password.length < 8) {
       setError('Password must be at least 8 characters.'); return;
     }
-
     setLoading(true);
     setError('');
-
     try {
       await resetPassword({ uid, token, ...form });
       setSuccess(true);
@@ -40,46 +35,49 @@ export default function ResetPasswordPage() {
   };
 
   return (
-    <div style={styles.page}>
+    <div style={{ minHeight: '100vh', background: 'var(--color-grey)', fontFamily: 'var(--font-base)' }}>
       <Navbar />
-      <div style={styles.outer}>
-        <div style={styles.card}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '80px 20px' }}>
+        <div className="card" style={{ maxWidth: '400px', width: '100%', padding: '40px' }}>
 
           {success ? (
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontSize: '48px', marginBottom: '16px' }}>✅</div>
-              <h2 style={{ color: '#1E6B45' }}>Password Updated!</h2>
-              <p style={{ color: '#555', marginTop: '12px' }}>
+              <h2 style={{ color: 'var(--color-success)' }}>Password Updated!</h2>
+              <div className="alert-success" style={{ marginTop: '16px' }}>
                 Redirecting to sign in...
-              </p>
+              </div>
             </div>
           ) : (
             <>
-              <h2 style={styles.title}>Set New Password</h2>
+              <h2 style={{ color: 'var(--color-primary)', fontSize: '22px', fontWeight: 700, marginBottom: '24px' }}>
+                Set New Password
+              </h2>
 
-              {error && <div style={styles.error}>{error}</div>}
+              {error && <div className="alert-error" style={{ marginBottom: '16px' }}>{error}</div>}
 
               <form onSubmit={handleSubmit}>
                 {[
-                  ['New Password', 'new_password'],
-                  ['Confirm Password', 'confirm_password']
+                  ['New Password',     'new_password'],
+                  ['Confirm Password', 'confirm_password'],
                 ].map(([lbl, fld]) => (
                   <div key={fld}>
-                    <label style={styles.label}>{lbl}</label>
+                    <label style={labelStyle}>{lbl}</label>
                     <input
-                      type='password'
+                      className="form-input"
+                      style={{ marginBottom: '16px' }}
+                      type="password"
                       required
                       value={form[fld]}
                       onChange={(e) => setForm({ ...form, [fld]: e.target.value })}
-                      style={styles.input}
                     />
                   </div>
                 ))}
-
                 <button
-                  type='submit'
+                  className="btn-primary"
+                  type="submit"
                   disabled={loading}
-                  style={styles.btn}
+                  style={{ width: '100%', fontSize: '15px', padding: '12px' }}
                 >
                   {loading ? 'Updating...' : 'Update Password'}
                 </button>
@@ -93,65 +91,10 @@ export default function ResetPasswordPage() {
   );
 }
 
-const styles = {
-  page: {
-    minHeight: '100vh',
-    background: '#F3EFF8',
-    fontFamily: 'Arial, sans-serif',
-  },
-  outer: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: '80px 20px',
-  },
-  card: {
-    background: '#fff',
-    padding: '40px',
-    borderRadius: '12px',
-    boxShadow: '0 4px 24px rgba(75,46,131,0.12)',
-    maxWidth: '400px',
-    width: '100%',
-  },
-  title: {
-    color: '#4B2E83',
-    fontSize: '22px',
-    fontWeight: 700,
-    marginBottom: '24px',
-  },
-  label: {
-    display: 'block',
-    color: '#555',
-    fontSize: '13px',
-    fontWeight: 600,
-    marginBottom: '6px',
-  },
-  input: {
-    width: '100%',
-    padding: '10px',
-    border: '1px solid #ddd',
-    borderRadius: '6px',
-    marginBottom: '16px',
-    fontSize: '14px',
-    boxSizing: 'border-box',
-  },
-  btn: {
-    width: '100%',
-    padding: '12px',
-    background: '#4B2E83',
-    color: '#fff',
-    border: 'none',
-    borderRadius: '6px',
-    fontSize: '15px',
-    fontWeight: 700,
-    cursor: 'pointer',
-  },
-  error: {
-    color: '#C0392B',
-    background: '#fdf0f0',
-    padding: '10px',
-    borderRadius: '6px',
-    marginBottom: '16px',
-    fontSize: '13px',
-  },
+const labelStyle = {
+  display: 'block',
+  color: '#555',
+  fontSize: '13px',
+  fontWeight: 600,
+  marginBottom: '6px',
 };

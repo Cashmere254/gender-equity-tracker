@@ -3,42 +3,22 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
-// NAV_ITEMS defines which roles can see each navigation item.
-// This must match the allowedRoles in App.jsx PrivateRoute definitions.
 const NAV_ITEMS = [
-  {
-    icon: '🏠', label: 'Dashboard', path: '/dashboard',
-    roles: ['Admin', 'ME Officer', 'Program Manager', 'Donor']
-  },
-  {
-    icon: '📤', label: 'Upload Report', path: '/upload',
-    roles: ['Admin', 'ME Officer']
-  },
-  {
-    icon: '📈', label: 'Analytics', path: '/analytics',
-    roles: ['Admin', 'ME Officer', 'Program Manager']
-  },
-  {
-    icon: '📝', label: 'Report Builder', path: '/report-builder',
-    roles: ['Admin', 'ME Officer']
-  },
-  {
-    icon: '📚', label: 'Evidence Library', path: '/evidence',
-    roles: ['Admin', 'ME Officer', 'Program Manager', 'Donor']
-  },
-  {
-    icon: '⚙', label: 'Settings', path: '/settings',
-    roles: ['Admin', 'ME Officer', 'Program Manager', 'Donor']
-  },
+  { icon: '🏠', label: 'Dashboard',        path: '/dashboard',      roles: ['Admin', 'ME Officer', 'Program Manager', 'Donor'] },
+  { icon: '📤', label: 'Upload Report',    path: '/upload',         roles: ['Admin', 'ME Officer'] },
+  { icon: '📈', label: 'Analytics',        path: '/analytics',      roles: ['Admin', 'ME Officer', 'Program Manager'] },
+  { icon: '📝', label: 'Report Builder',   path: '/report-builder', roles: ['Admin', 'ME Officer'] },
+  { icon: '📚', label: 'Evidence Library', path: '/evidence',       roles: ['Admin', 'ME Officer', 'Program Manager', 'Donor'] },
+  { icon: '⚙',  label: 'Settings',         path: '/settings',       roles: ['Admin', 'ME Officer', 'Program Manager', 'Donor'] },
 ];
 
 export default function Sidebar() {
   const { user, logoutUser } = useAuth();
-  const navigate = useNavigate();
-  const location = useLocation();
+  const navigate             = useNavigate();
+  const location             = useLocation();
 
-  // Filter nav items to only those the current user's role can see
-  const visible = NAV_ITEMS.filter((item) => item.roles.includes(user?.role));
+  const visible  = NAV_ITEMS.filter((item) => item.roles.includes(user?.role));
+  const isActive = (path) => location.pathname === path;
 
   return (
     <aside style={styles.sidebar}>
@@ -50,7 +30,13 @@ export default function Sidebar() {
             key={item.path}
             style={{
               ...styles.navItem,
-              ...(location.pathname === item.path ? styles.activeItem : {})
+              borderLeft: isActive(item.path)
+                ? '3px solid var(--color-accent)'
+                : '3px solid transparent',
+              background: isActive(item.path)
+                ? 'rgba(201,168,76,0.15)'
+                : 'transparent',
+              color: isActive(item.path) ? '#fff' : 'rgba(255,255,255,0.8)',
             }}
             onClick={() => navigate(item.path)}
           >
@@ -64,7 +50,10 @@ export default function Sidebar() {
         <span style={styles.userRole}>{user?.role}</span>
       </div>
 
-      <button style={styles.logout} onClick={logoutUser}>
+      <button
+        style={styles.logout}
+        onClick={logoutUser}
+      >
         🚪 Sign Out
       </button>
     </aside>
@@ -74,35 +63,28 @@ export default function Sidebar() {
 const styles = {
   sidebar: {
     width: '220px',
-    background: '#4B2E83',
+    background: 'var(--color-primary-dark)',
     minHeight: '100vh',
     display: 'flex',
     flexDirection: 'column',
   },
   logo: {
-    color: '#C9A84C',
+    color: 'var(--color-accent)',
     fontWeight: 700,
     fontSize: '18px',
     padding: '28px 20px 24px',
-    borderBottom: '1px solid #6B4FA8',
+    borderBottom: '1px solid var(--color-primary-light)',
   },
   navItem: {
-    color: 'rgba(255,255,255,0.8)',
     padding: '13px 20px',
     cursor: 'pointer',
     fontSize: '14px',
-    borderLeft: '3px solid transparent',
-    transition: 'background 0.2s',
-  },
-  activeItem: {
-    background: 'rgba(201,168,76,0.15)',
-    borderLeftColor: '#C9A84C',
-    color: '#fff',
+    transition: 'var(--transition)',
   },
   userInfo: {
     marginTop: 'auto',
     padding: '16px 20px',
-    borderTop: '1px solid #6B4FA8',
+    borderTop: '1px solid var(--color-primary-light)',
   },
   userName: {
     display: 'block',
@@ -112,17 +94,18 @@ const styles = {
   },
   userRole: {
     display: 'block',
-    color: '#C9A84C',
+    color: 'var(--color-accent)',
     fontSize: '12px',
     marginTop: '2px',
   },
   logout: {
-    color: '#C9A84C',
+    color: 'var(--color-accent)',
     background: 'none',
     border: 'none',
     padding: '16px 20px',
     cursor: 'pointer',
     fontSize: '14px',
     textAlign: 'left',
+    transition: 'var(--transition)',
   },
 };

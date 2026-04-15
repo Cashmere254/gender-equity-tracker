@@ -11,30 +11,21 @@ const SOURCE_TYPES = [
   'Field Notes',
   'Beneficiary Narrative',
   'Programme Report',
-  'Survey CSV'
+  'Survey CSV',
 ];
 
 export default function UploadPage() {
-  const [file, setFile] = useState(null);
+  const [file, setFile]           = useState(null);
   const [programId, setProgramId] = useState('');
   const [sourceType, setSourceType] = useState(SOURCE_TYPES[0]);
-  const [status, setStatus] = useState(null); // 'success' | 'error' | null
-  const [message, setMessage] = useState('');
+  const [status, setStatus]       = useState(null);
+  const [message, setMessage]     = useState('');
   const [uploading, setUploading] = useState(false);
-
-  const { data: programs } = useFetch(getPrograms);
+  const { data: programs }        = useFetch(getPrograms);
 
   const handleSubmit = async () => {
-    if (!file) {
-      setStatus('error');
-      setMessage('Please select a file.');
-      return;
-    }
-    if (!programId) {
-      setStatus('error');
-      setMessage('Please select a programme.');
-      return;
-    }
+    if (!file)      { setStatus('error'); setMessage('Please select a file.'); return; }
+    if (!programId) { setStatus('error'); setMessage('Please select a programme.'); return; }
 
     setUploading(true);
     setStatus(null);
@@ -50,67 +41,55 @@ export default function UploadPage() {
       setMessage(`✅ Uploaded! ${res.data.chunks} narrative chunks sent to AI analysis.`);
       setFile(null);
     } catch (err) {
-      const msg = err.response?.data?.error || 'Upload failed. Please try again.';
       setStatus('error');
-      setMessage(msg);
+      setMessage(err.response?.data?.error || 'Upload failed. Please try again.');
     } finally {
       setUploading(false);
     }
   };
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', fontFamily: 'Arial, sans-serif' }}>
+    <div className="page-layout">
       <Sidebar />
-      <main style={{
-        flex: 1, padding: '40px',
-        background: '#F7F5FB', maxWidth: '760px'
-      }}>
-        <h1 style={{ color: '#4B2E83', marginBottom: '8px' }}>
-          Upload Qualitative Evidence
-        </h1>
-        <p style={{ color: '#666', marginBottom: '28px' }}>
+      <main className="main-content" style={{ maxWidth: '760px' }}>
+
+        <h1 className="page-title">Upload Qualitative Evidence</h1>
+        <p className="page-subtitle">
           Upload programme reports for AI analysis. Accepts PDF, DOCX, TXT, CSV.
         </p>
 
-        {/* FileUploader component */}
+        {/* FileUploader */}
         <FileUploader onFileSelect={setFile} />
 
         {/* Metadata form */}
-        <div style={{
-          background: '#fff', padding: '24px', borderRadius: '10px',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.06)', margin: '24px 0'
-        }}>
-          <label style={styles.label}>Programme *</label>
+        <div className="card" style={{ margin: '24px 0' }}>
+          <label style={labelStyle}>Programme *</label>
           <select
-            style={styles.select}
+            className="form-input"
+            style={{ marginBottom: '16px' }}
             value={programId}
             onChange={(e) => setProgramId(e.target.value)}
           >
-            <option value=''>Select a programme...</option>
+            <option value="">Select a programme...</option>
             {programs?.map((p) => (
               <option key={p.id} value={p.id}>{p.name}</option>
             ))}
           </select>
 
-          <label style={styles.label}>Source Type</label>
+          <label style={labelStyle}>Source Type</label>
           <select
-            style={styles.select}
+            className="form-input"
             value={sourceType}
             onChange={(e) => setSourceType(e.target.value)}
           >
-            {SOURCE_TYPES.map((t) => (
-              <option key={t}>{t}</option>
-            ))}
+            {SOURCE_TYPES.map((t) => <option key={t}>{t}</option>)}
           </select>
         </div>
 
         {/* Status banner */}
         {status && (
-          <div style={{
-            padding: '12px', borderRadius: '6px', marginBottom: '16px',
-            background: status === 'success' ? '#EDF7F1' : '#fdf0f0',
-            color: status === 'success' ? '#1E6B45' : '#C0392B'
-          }}>
+          <div className={status === 'success' ? 'alert-success' : 'alert-error'}
+            style={{ marginBottom: '16px' }}>
             {message}
           </div>
         )}
@@ -118,21 +97,23 @@ export default function UploadPage() {
         {/* Action buttons */}
         <div style={{ display: 'flex', gap: '12px' }}>
           <button
+            className="btn-primary"
             onClick={handleSubmit}
             disabled={uploading}
-            style={styles.submitBtn}
+            style={{ padding: '12px 28px', fontSize: '15px' }}
           >
             {uploading ? 'Analyzing...' : 'Submit for Analysis'}
           </button>
           <button
+            className="btn-secondary"
             onClick={() => { setFile(null); setStatus(null); setMessage(''); }}
-            style={styles.clearBtn}
+            style={{ padding: '12px 24px' }}
           >
             Clear
           </button>
         </div>
 
-        <p style={{ color: '#999', fontSize: '12px', marginTop: '12px', fontStyle: 'italic' }}>
+        <p style={{ color: 'var(--color-text-muted)', fontSize: '12px', marginTop: '12px', fontStyle: 'italic' }}>
           After submission, AI will extract themes, entities, and sentiment with confidence scores.
         </p>
       </main>
@@ -140,40 +121,10 @@ export default function UploadPage() {
   );
 }
 
-const styles = {
-  label: {
-    display: 'block',
-    fontWeight: 600,
-    color: '#555',
-    fontSize: '13px',
-    margin: '0 0 6px',
-  },
-  select: {
-    width: '100%',
-    padding: '10px',
-    border: '1px solid #ddd',
-    borderRadius: '6px',
-    marginBottom: '16px',
-    fontSize: '14px',
-    boxSizing: 'border-box',
-  },
-  submitBtn: {
-    background: '#4B2E83',
-    color: '#fff',
-    border: 'none',
-    padding: '12px 28px',
-    borderRadius: '6px',
-    fontWeight: 700,
-    cursor: 'pointer',
-    fontSize: '15px',
-  },
-  clearBtn: {
-    background: '#C0392B',
-    color: '#fff',
-    border: 'none',
-    padding: '12px 24px',
-    borderRadius: '6px',
-    cursor: 'pointer',
-    fontSize: '14px',
-  },
+const labelStyle = {
+  display: 'block',
+  fontWeight: 600,
+  color: '#555',
+  fontSize: '13px',
+  marginBottom: '6px',
 };
