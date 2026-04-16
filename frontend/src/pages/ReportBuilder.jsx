@@ -7,70 +7,91 @@ import { getPrograms, saveReport, exportReportDocx } from '../services/api';
 import Sidebar from '../components/Sidebar';
 
 const COMPONENT_LIBRARY = [
-  { type: 'cover_page', label: '📄 Cover Page' },
+  { type: 'cover_page',        label: '📄 Cover Page' },
   { type: 'executive_summary', label: '📋 Executive Summary' },
-  { type: 'kpi_grid', label: '📊 KPI Grid' },
-  { type: 'sentiment_chart', label: '📈 Sentiment Chart' },
-  { type: 'narrative_block', label: '📝 Narrative Block' },
-  { type: 'evidence_table', label: '🔍 Evidence Table' },
-  { type: 'appendix', label: '📎 Appendix' },
+  { type: 'kpi_grid',          label: '📊 KPI Grid' },
+  { type: 'sentiment_chart',   label: '📈 Sentiment Chart' },
+  { type: 'narrative_block',   label: '📝 Narrative Block' },
+  { type: 'evidence_table',    label: '🔍 Evidence Table' },
+  { type: 'appendix',          label: '📎 Appendix' },
 ];
 
+// ─── Rich placeholder content per section type ────────────────────────────────
+function getDefaultContent(type) {
+  switch (type) {
+    case 'cover_page':
+      return 'Akili Dada — Gender Equity Impact Report | Q1 2026';
+    case 'executive_summary':
+      return 'This report presents AI-analysed evidence of gender equity outcomes across the programme period. Evidence is drawn from qualitative participant narratives, processed using the GEI Tracker NLP pipeline.';
+    case 'kpi_grid':
+      return 'KPI Grid — Select a programme in the Properties panel to load live KPI data. Each card will display evidence count, average confidence score, and sentiment rating.';
+    case 'sentiment_chart':
+      return 'Sentiment Trend Chart — AI confidence and sentiment trends across all active KPIs.';
+    case 'narrative_block':
+      return 'Beneficiary narrative block — drag a specific narrative here from the Evidence Library.';
+    case 'evidence_table':
+      return 'Evidence traceability table — each KPI finding linked to its source narrative and document.';
+    case 'appendix':
+      return 'Appendix A: Raw NLP extraction data. Appendix B: Source document list.';
+    default:
+      return '[Section content — click to edit]';
+  }
+}
+
 export default function ReportBuilder() {
-  const [sections, setSections] = useState([]);
-  const [title, setTitle] = useState('');
-  const [programId, setProgramId] = useState('');
-  const [saving, setSaving] = useState(false);
-  const [exporting, setExporting] = useState(false);
-  const [message, setMessage] = useState('');
-  const [messageType, setMessageType] = useState('');
+  const [sections, setSections]         = useState([]);
+  const [title, setTitle]               = useState('');
+  const [programId, setProgramId]       = useState('');
+  const [saving, setSaving]             = useState(false);
+  const [exporting, setExporting]       = useState(false);
+  const [exportingPdf, setExportingPdf] = useState(false);
+  const [message, setMessage]           = useState('');
+  const [messageType, setMessageType]   = useState('');
   const [savedReportId, setSavedReportId] = useState(null);
+  const { data: programs }              = useFetch(getPrograms);
 
-  const { data: programs } = useFetch(getPrograms);
-
-  // Add a section from the component library
+  // ─── Add a section from the component library ─────────────────────────────
   const addSection = (component) => {
     const newSection = {
-      id: `section-${Date.now()}`,
-      type: component.type,
+      id:      `section-${Date.now()}`,
+      type:    component.type,
       heading: component.label.replace(/^[^\s]+\s/, ''), // strip emoji
-      content: `Content for ${component.label.replace(/^[^\s]+\s/, '')}...`
+      content: getDefaultContent(component.type),        // rich placeholder
     };
     setSections([...sections, newSection]);
   };
 
-  // Remove a section
+  // ─── Remove a section ─────────────────────────────────────────────────────
   const removeSection = (id) => {
     setSections(sections.filter((s) => s.id !== id));
   };
 
-  // Update section content
+  // ─── Update section content inline ────────────────────────────────────────
   const updateContent = (id, content) => {
-    setSections(sections.map((s) => s.id === id ? { ...s, content } : s));
+    setSections(sections.map((s) => (s.id === id ? { ...s, content } : s)));
   };
 
-  // Handle drag and drop reorder
+  // ─── Drag-and-drop reorder ────────────────────────────────────────────────
   const onDragEnd = (result) => {
     if (!result.destination) return;
     const reordered = [...sections];
-    const [moved] = reordered.splice(result.source.index, 1);
+    const [moved]   = reordered.splice(result.source.index, 1);
     reordered.splice(result.destination.index, 0, moved);
     setSections(reordered);
   };
 
-  // Save report draft
+  // ─── Save draft to backend ────────────────────────────────────────────────
   const handleSave = async () => {
-    if (!programId) { setMessage('Please select a programme.'); setMessageType('error'); return; }
-    if (!title) { setMessage('Please enter a report title.'); setMessageType('error'); return; }
-    if (sections.length === 0) { setMessage('Add at least one section.'); setMessageType('error'); return; }
-
+    if (!programId)        { setMessage('Please select a programme.');       setMessageType('error'); return; }
+    if (!title)            { setMessage('Please enter a report title.');      setMessageType('error'); return; }
+    if (sections.length === 0) { setMessage('Add at least one section.');    setMessageType('error'); return; }
     setSaving(true);
     try {
       const res = await saveReport({
         program_id: programId,
         title,
-        sections: sections.map((s) => ({ heading: s.heading, content: s.content })),
-        report_id: savedReportId || undefined
+        sections:   sections.map((s) => ({ heading: s.heading, content: s.content })),
+        report_id:  savedReportId || undefined,
       });
       setSavedReportId(res.data.report_id);
       setMessage('✅ Report draft saved successfully.');
@@ -83,7 +104,7 @@ export default function ReportBuilder() {
     }
   };
 
-  // Export DOCX
+  // ─── Export DOCX ──────────────────────────────────────────────────────────
   const handleExportDocx = async () => {
     if (!savedReportId) {
       setMessage('Please save the report first before exporting.');
@@ -92,10 +113,10 @@ export default function ReportBuilder() {
     }
     setExporting(true);
     try {
-      const res = await exportReportDocx(savedReportId);
-      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const res  = await exportReportDocx(savedReportId);
+      const url  = window.URL.createObjectURL(new Blob([res.data]));
       const link = document.createElement('a');
-      link.href = url;
+      link.href  = url;
       link.setAttribute('download', `${title || 'report'}.docx`);
       document.body.appendChild(link);
       link.click();
@@ -107,6 +128,54 @@ export default function ReportBuilder() {
       setMessageType('error');
     } finally {
       setExporting(false);
+    }
+  };
+
+  // ─── Export PDF (browser-side via print dialog) ───────────────────────────
+  const handleExportPdf = async () => {
+    if (sections.length === 0) {
+      setMessage('Add at least one section before exporting PDF.');
+      setMessageType('error');
+      return;
+    }
+    setExportingPdf(true);
+    try {
+      // Open a print-ready window with the canvas content
+      const canvas    = document.getElementById('report-canvas');
+      const content   = canvas ? canvas.innerHTML : '<p>No content</p>';
+      const printWin  = window.open('', '_blank', 'width=900,height=700');
+      printWin.document.write(`
+        <html>
+          <head>
+            <title>${title || 'GEI Report'}</title>
+            <style>
+              body { font-family: Arial, sans-serif; padding: 40px; color: #1A1A2E; }
+              h2   { color: #4B2E83; border-bottom: 2px solid #C9A84C; padding-bottom: 6px; }
+              textarea, input { display: none; }
+              .section-content { white-space: pre-wrap; font-size: 14px; line-height: 1.6; }
+            </style>
+          </head>
+          <body>
+            <h1 style="color:#4B2E83;">${title || 'Gender Equity Impact Report'}</h1>
+            ${sections.map((s, i) => `
+              <h2>§${i + 1} — ${s.heading}</h2>
+              <p class="section-content">${s.content}</p>
+            `).join('')}
+            <hr/>
+            <p style="color:#999;font-size:11px;">Generated by GEI Tracker · ${new Date().toLocaleDateString()}</p>
+          </body>
+        </html>
+      `);
+      printWin.document.close();
+      printWin.focus();
+      setTimeout(() => { printWin.print(); printWin.close(); }, 500);
+      setMessage('✅ PDF export dialog opened.');
+      setMessageType('success');
+    } catch {
+      setMessage('PDF export failed. Please try again.');
+      setMessageType('error');
+    } finally {
+      setExportingPdf(false);
     }
   };
 
@@ -123,7 +192,10 @@ export default function ReportBuilder() {
               {saving ? 'Saving...' : '💾 Save Draft'}
             </button>
             <button onClick={handleExportDocx} disabled={exporting} style={styles.exportBtn}>
-              {exporting ? 'Exporting...' : '📥 Export DOCX'}
+              {exporting ? 'Exporting...' : '📄 Export DOCX'}
+            </button>
+            <button onClick={handleExportPdf} disabled={exportingPdf} style={styles.pdfBtn}>
+              {exportingPdf ? 'Preparing...' : '🖨 Export PDF'}
             </button>
           </div>
         </div>
@@ -133,7 +205,7 @@ export default function ReportBuilder() {
           <div style={{
             padding: '10px 32px', fontSize: '13px',
             background: messageType === 'success' ? '#EDF7F1' : '#fdf0f0',
-            color: messageType === 'success' ? '#1E6B45' : '#C0392B',
+            color:      messageType === 'success' ? '#1E6B45' : '#C0392B',
           }}>
             {message}
           </div>
@@ -168,10 +240,15 @@ export default function ReportBuilder() {
                 </p>
               </div>
             )}
+
             <DragDropContext onDragEnd={onDragEnd}>
-              <Droppable droppableId='canvas'>
+              <Droppable droppableId="canvas">
                 {(provided) => (
-                  <div ref={provided.innerRef} {...provided.droppableProps}>
+                  <div
+                    id="report-canvas"
+                    ref={provided.innerRef}
+                    {...provided.droppableProps}
+                  >
                     {sections.map((section, index) => (
                       <Draggable key={section.id} draggableId={section.id} index={index}>
                         {(provided) => (
@@ -184,7 +261,7 @@ export default function ReportBuilder() {
                               <span
                                 {...provided.dragHandleProps}
                                 style={styles.dragHandle}
-                                title='Drag to reorder'
+                                title="Drag to reorder"
                               >
                                 ⠿
                               </span>
@@ -193,7 +270,7 @@ export default function ReportBuilder() {
                               <button
                                 onClick={() => removeSection(section.id)}
                                 style={styles.removeBtn}
-                                title='Remove section'
+                                title="Remove section"
                               >
                                 ✕
                               </button>
@@ -218,33 +295,29 @@ export default function ReportBuilder() {
           {/* Right panel: Properties */}
           <div style={styles.rightPanel}>
             <h3 style={styles.panelTitle}>Properties</h3>
-
             <label style={styles.label}>Report Title</label>
             <input
               style={styles.input}
-              type='text'
-              placeholder='e.g. Q1 2026 Impact Report'
+              type="text"
+              placeholder="e.g. Q1 2026 Impact Report"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
             />
-
             <label style={styles.label}>Programme</label>
             <select
               style={styles.input}
               value={programId}
               onChange={(e) => setProgramId(e.target.value)}
             >
-              <option value=''>Select programme...</option>
+              <option value="">Select programme...</option>
               {programs?.map((p) => (
                 <option key={p.id} value={p.id}>{p.name}</option>
               ))}
             </select>
-
             <label style={styles.label}>Sections</label>
             <p style={{ color: '#4B2E83', fontWeight: 700, fontSize: '24px', margin: '4px 0' }}>
               {sections.length}
             </p>
-
             <div style={{ marginTop: '16px', padding: '12px', background: '#F3EFF8', borderRadius: '6px' }}>
               <p style={{ color: '#666', fontSize: '12px', lineHeight: 1.6 }}>
                 💡 <strong>Tip:</strong> Save your draft first, then use Export DOCX to download.
@@ -269,11 +342,16 @@ const styles = {
     color: '#4B2E83', margin: 0, fontSize: '20px', fontWeight: 700,
   },
   saveBtn: {
-    background: '#4B2E83', color: '#fff', border: 'none',
+    background: '#6B4FA8', color: '#fff', border: 'none',
     padding: '9px 20px', borderRadius: '6px', fontWeight: 700,
     cursor: 'pointer', fontSize: '14px',
   },
   exportBtn: {
+    background: '#4B2E83', color: '#fff', border: 'none',
+    padding: '9px 20px', borderRadius: '6px', fontWeight: 700,
+    cursor: 'pointer', fontSize: '14px',
+  },
+  pdfBtn: {
     background: '#C9A84C', color: '#fff', border: 'none',
     padding: '9px 20px', borderRadius: '6px', fontWeight: 700,
     cursor: 'pointer', fontSize: '14px',
