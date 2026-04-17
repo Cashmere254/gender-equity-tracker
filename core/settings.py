@@ -147,3 +147,25 @@ FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:3000')
 # ─── FILE UPLOAD SIZE LIMIT (50 MB) ──────────────────────────────────────────
 DATA_UPLOAD_MAX_MEMORY_SIZE = 52428800  # 50 MB
 FILE_UPLOAD_MAX_MEMORY_SIZE = 52428800  # 50 MB
+
+# ─── PRODUCTION SETTINGS (Railway) ───────────────────────────────────────────
+import dj_database_url
+
+database_url = os.getenv('DATABASE_URL')
+if database_url:
+    DATABASES['default'] = dj_database_url.parse(database_url, conn_max_age=600)
+
+# WhiteNoise serves static files without a separate web server
+MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# Production CORS — Railway injects FRONTEND_URL
+if not DEBUG:
+    CORS_ALLOWED_ORIGINS = [
+        os.getenv('FRONTEND_URL', 'http://localhost:3000'),
+    ]
+    ALLOWED_HOSTS = ['*']
+
+# Switch to SMTP email in production
+if not DEBUG:
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
