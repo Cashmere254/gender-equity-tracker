@@ -157,7 +157,7 @@ if database_url:
 if not DEBUG:
     # WhiteNoise serves static files without a separate web server
     MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
-    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+    STATICFILES_STORAGE = 'whitenoise.storage.StaticFilesStorage'
     CORS_ALLOWED_ORIGINS = [
         os.getenv('FRONTEND_URL', 'http://localhost:3000'),
     ]
