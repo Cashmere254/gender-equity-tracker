@@ -154,15 +154,12 @@ import dj_database_url
 database_url = os.getenv('DATABASE_URL')
 if database_url:
     DATABASES['default'] = dj_database_url.parse(database_url, conn_max_age=600)
-
+if not DEBUG:
 # WhiteNoise serves static files without a separate web server
 MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-
-# Production CORS — Railway injects FRONTEND_URL
-if not DEBUG:
-    CORS_ALLOWED_ORIGINS = [
-        os.getenv('FRONTEND_URL', 'http://localhost:3000'),
+CORS_ALLOWED_ORIGINS = [
+    os.getenv('FRONTEND_URL', 'http://localhost:3000'),
     ]
     ALLOWED_HOSTS = ['*']
 
